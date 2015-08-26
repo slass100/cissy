@@ -18,6 +18,7 @@
 #define RANGE_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 struct rangeElement {
 	uint32_t start;

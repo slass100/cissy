@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     csvline_addField(cline, txt, 0, strlen(txt));
     csvline_printToFile(cline, stdout);
   }
-  printf("Count = %d\n", csvline_getFieldCnt(cline));
+  printf("Count = %d\n", (int) csvline_getFieldCnt(cline));
   printf("1st = %s\n", csvline_getField(cline, 0));
   csvline_reset(cline);
   csvline_printToFile(cline, stdout);

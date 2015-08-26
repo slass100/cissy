@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
   }
   
   char* rawInput = NULL;
-  int rawInputSize = 128;
+  size_t rawInputSize = 128;
   // getline malloc/realloc
   rawInput = malloc(rawInputSize);
   if (rawInput == NULL) {

@@ -62,11 +62,11 @@ void csvline_printToFile(struct csvline* ptr, FILE* fp) {
   fprintf(fp, "[[");
   int i;
   for (i=0; i<ptr->fieldsize; i++) {
-    fprintf(stderr, "[%s:%d]", ptr->field[i]->data, ptr->field[i]->len);
+    fprintf(stderr, "[%s:%d]", ptr->field[i]->data, (int) ptr->field[i]->len);
   }
   fprintf(fp, "]");
-  fprintf(fp, "fs(%d):", ptr->fieldsize);
-  fprintf(fp, "i(%d)", ptr->currentIdx);
+  fprintf(fp, "fs(%d):", (int) ptr->fieldsize);
+  fprintf(fp, "i(%d)", (int) ptr->currentIdx);
   fprintf(fp, "]\n");
 }
 

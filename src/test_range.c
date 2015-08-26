@@ -140,8 +140,6 @@ int main(int argc, char** argv) {
   assert(strcmp(buf, rv) == 0);
   printf("\tok\n");
   
-  printf("%d %d %d\n", strlen(buf), sizeof(buf), snprintf(NULL, 0, "abc %d", 15));
-
   rangeFree(list);
 
   /////////////////////////////////////////////////

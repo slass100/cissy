@@ -23,7 +23,7 @@
 const int STR_MEM_PAD = 10;
 
 void csvfield_printToFile(struct csvfield* ptr, FILE* fp) {
-	fprintf(fp, "[%s:%d]\n", ptr->data, ptr->len);
+	fprintf(fp, "[%s:%d]\n", ptr->data, (int) ptr->len);
 }
 
 void csvfield_set(struct csvfield* ptr, const char* buf, int bufStartIdx, int buflen) {
