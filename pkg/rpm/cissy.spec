@@ -14,6 +14,9 @@ BuildRequires: gcc
 a csv file manipulation utility / tool
 
 %prep
+cd %{_sourcedir}
+git clone https://github.com/slass100/cissy.git
+git checkout tags/%{version}
 
 %build
 pwd
