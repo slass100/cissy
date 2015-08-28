@@ -1,0 +1,9 @@
+#!/bin/sh
+
+for file in in_out/test_*_input.txt
+do
+    TEST=`echo ${file} | sed 's/.*\/(.*)_input.txt/\1/'`
+    echo -n "Running ${TEST}:"
+    cat in_out/${TEST}_input.txt
+
+done
