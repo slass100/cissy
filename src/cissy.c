@@ -50,7 +50,8 @@ int32_t gLineCnt;
 //Global parameters
 FILE* gpInput;
 FILE* gpOutput;
-char gpDelim;
+char gpDelimIn;
+char gpDelimOut;
 char gpQuote;
 bool gpAllowBinaryFlag = false;
 int gpVerbose;
@@ -89,7 +90,8 @@ int main(int argc, char** argv) {
   //init
   gpInput=stdin;
   gpOutput=stdout;
-  gpDelim = ',';
+  gpDelimIn = ',';
+  gpDelimOut = ',';
   gpQuote = '"';
   gpVerbose = 0;
 
@@ -131,8 +133,41 @@ int main(int argc, char** argv) {
 	return -1;
       }
       arginc++;
+      if (strlen(argv[arginc]) != 1) {
+	fprintf(stderr, "error: only single character delimiters allowed: '%s'\n", argv[arginc]);
+	return -1;
+      }
       debug(5, "arg %s %d\n", argv[arginc], strlen(argv[arginc]));
-      gpDelim = argv[arginc][0];
+      gpDelimIn = argv[arginc][0];
+      gpDelimOut = argv[arginc][0];
+      arginc++;
+    }
+    else if (strcmp(argv[arginc], "-di")==0) {
+      if (argc <= arginc+1) {
+	fprintf(stderr, "error: missing argument for '%s'\n", argv[arginc]);
+	return -1;
+      }
+      arginc++;
+      if (strlen(argv[arginc]) != 1) {
+	fprintf(stderr, "error: only single character delimiters allowed: '%s'\n", argv[arginc]);
+	return -1;
+      }
+      debug(5, "arg %s %d\n", argv[arginc], strlen(argv[arginc]));
+      gpDelimIn = argv[arginc][0];
+      arginc++;
+    }
+    else if (strcmp(argv[arginc], "-do")==0) {
+      if (argc <= arginc+1) {
+	fprintf(stderr, "error: missing argument for '%s'\n", argv[arginc]);
+	return -1;
+      }
+      arginc++;
+      if (strlen(argv[arginc]) != 1) {
+	fprintf(stderr, "error: only single character delimiters allowed: '%s'\n", argv[arginc]);
+	return -1;
+      }
+      debug(5, "arg %s %d\n", argv[arginc], strlen(argv[arginc]));
+      gpDelimOut = argv[arginc][0];
       arginc++;
     }
     else if (strcmp(argv[arginc], "-q")==0) {
@@ -170,7 +205,7 @@ int main(int argc, char** argv) {
       return -1;
     }
   }
-  debug(5, "main: delim(%c) quote(%c)\n", gpDelim, gpQuote);
+  debug(5, "main: input delimiter(%c) output delimiter(%c) quote(%c)\n", gpDelimIn, gpDelimOut, gpQuote);
   char sbuf[1024]; //FIXME
   debug(5, "main: OutputColumns = %s\n", rangeListToString(sbuf, sizeof(sbuf), gpOutColumns));
   debug(5, "main:start\n");
@@ -272,10 +307,9 @@ void outputLine(struct csvline* cline) {
     for (i=0; i<fieldcnt; i++) {
       fprintf(gpOutput, "%s", csvline_getField(cline,i));
       if ( (i+1) != fieldcnt) {
-	fprintf(gpOutput, "%c", gpDelim);
+	fprintf(gpOutput, "%c", gpDelimOut);
       }
     }    
-    fprintf(gpOutput, cline->eolStr);
   }
   else {
     debug(50,"outputLine:printranges\n");
@@ -295,7 +329,7 @@ void outputLine(struct csvline* cline) {
 	  fprintf(gpOutput, "%s",str);
 	}
 	if (list->next != NULL) {
-	  fprintf (gpOutput, "%c", gpDelim);
+	  fprintf (gpOutput, "%c", gpDelimOut);
 	}
 	break;
       case STARTEND:
@@ -306,10 +340,10 @@ void outputLine(struct csvline* cline) {
 	  for (i=list->start - 1; (i+1) < list->end; i++) {
 	    str = csvline_getField(cline,i);
 	    if (strlen(str) == 0) {
-	      fprintf(gpOutput, "%c", gpDelim);
+	      fprintf(gpOutput, "%c", gpDelimOut);
 	    }
 	    else {
-	      fprintf(gpOutput, "%s%c", str, gpDelim);
+	      fprintf(gpOutput, "%s%c", str, gpDelimOut);
 	    }
 	  }
 	  int last = list->end - 1;
@@ -324,7 +358,7 @@ void outputLine(struct csvline* cline) {
 	  }
 	}
 	if (list->next != NULL) {
-	  fprintf (gpOutput, "%c", gpDelim);
+	  fprintf (gpOutput, "%c", gpDelimOut);
 	}
 	break;
       case GREATEREQUAL:
@@ -337,7 +371,7 @@ void outputLine(struct csvline* cline) {
 	    if (strlen(str) == 0) {
 	    }
 	    else {
-	      fprintf(gpOutput, "%s%c", str, gpDelim);
+	      fprintf(gpOutput, "%s%c", str, gpDelimOut);
 	    }
 	  }
 	  int last = colCnt - 1;
@@ -349,7 +383,7 @@ void outputLine(struct csvline* cline) {
 	  }
 	}
 	if (list->next != NULL) {
-	  fprintf (gpOutput, "%c", gpDelim);
+	  fprintf (gpOutput, "%c", gpDelimOut);
 	}
 	break;
       default:
@@ -385,7 +419,7 @@ int getField(char* buf, int buflen, int* end, bool* inQuoted) {
       if (c==gpQuote) {
 	*inQuoted=true;
       }
-      if (c==gpDelim) {
+      if (c==gpDelimIn) {
 	return rvDelim;
       }
       if (c=='\r') {

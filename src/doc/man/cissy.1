@@ -1,0 +1,88 @@
+.TH CISSY "1" "August 2015" "cissy 0.5" "User Commands"
+.SH NAME
+cissy \- csv delimited text processing utility/tool
+.SH SYNOPSIS
+.B cissy
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+.ds sd \fIcissy\fP
+.ds Sd \fICissy\fP
+\*(Sd is a stream (file or pipeline) processor used
+to perform basic transformations on delimited text
+files.  It's primary goal is to easily process
+delimited files for reformating and sorting
+(see EXAMPLES below).
+
+Command-line args are processed first to last, so 
+later args can override initial args.
+
+.SS
+Input/Output
+
+.HP
+.HP
+\fB\-i <input filename>\fR
+.IP
+reads from stdin, unless input file is specified
+.HP
+\fB\-o <output filename>\fR
+.IP
+reads from stdout, unless output file is specified
+
+.SS
+Processing Options
+.HP
+\fB\-d <in/out delimiter>\fR
+.IP
+Field separator
+.HP
+\fB\-di <input delimiter>\fR
+.IP
+Field separator
+.HP
+\fB\-do <output delimiter>\fR
+.IP
+Field separator
+
+
+
+.SH EXAMPLES
+
+.SS
+Selective Output
+.HP
+.HP
+\fBcissy -c 3\fR
+.IP
+output only the 3rd column
+
+.HP
+\fBcissy -c 3,1,2,4-\fR
+\fBcissy -c 3,1-2,4-\fR
+.IP
+move the 3rd column to the front
+
+.SS
+Sorting
+.HP
+.HP
+\fBcissy -c 2,1- | sort | cissy -c 2-\fR
+.IP
+sort by the 2nd column using sort(1).
+
+
+.SH BUGS
+.PP
+Report bugs to the Github bugtracker.
+
+.SH AUTHOR
+Written by Steven Lass.
+.SH COPYRIGHT
+Apache 2.0 License
+.SH "SEE ALSO"
+.BR awk (1),
+.BR sed (1),
+.BR sort (1),
+.BR tr (1)
+.PP
+
