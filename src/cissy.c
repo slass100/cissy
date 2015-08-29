@@ -64,6 +64,25 @@ int rvDelim = 0x04;
 
 void outputLine(struct csvline* cline);
 
+void usage(FILE* fp) {
+  char* help =
+    "cissy [options]\n" 
+    "\t-i <inputfile>\t (defaults to stdin)\n" 
+    "\t-o <outputfile>\t (defaults to stdout)\n" 
+    "\n"
+    "\t-d <delimiter>\t set the input and output delimiter\n" 
+    "\t-di <input delimiter>\t set the input delimiter\n" 
+    "\t-do <output delimiter>\t set the output delimiter\n"
+    "\n"
+    "\t-q <quote character>\n"
+    "\t-b \t\t allow binary data\n"
+    "\t-v \t\t send processing info to stderr\n"
+    "\t-h \t\t help\n"
+    ""
+    ;
+  fprintf(fp, help);
+}
+
 void debug(int level, char* fmt, ...) {
   if (level <= gpVerbose) {
     va_list args;
@@ -190,6 +209,10 @@ int main(int argc, char** argv) {
       gpOutColumns = parseIntRanges(argv[arginc]);
       arginc++;
     }
+    else if (strcmp(argv[arginc], "-h")==0) {
+      usage(stdout);
+      exit(0);
+    }    
     else if (strcmp(argv[arginc], "-v")==0) {
       gpVerbose++;
       arginc++;
