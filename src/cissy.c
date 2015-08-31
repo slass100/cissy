@@ -52,7 +52,8 @@ FILE* gpInput;
 FILE* gpOutput;
 char gpDelimIn;
 char gpDelimOut;
-char gpQuote;
+char gpQuoteIn;
+char gpQuoteOut;
 bool gpAllowBinaryFlag = false;
 int gpVerbose;
 struct rangeElement* gpOutColumns = NULL;
@@ -67,17 +68,21 @@ void outputLine(struct csvline* cline);
 void usage(FILE* fp) {
   char* help =
     "cissy [options]\n" 
-    "\t-i <inputfile>\t (defaults to stdin)\n" 
-    "\t-o <outputfile>\t (defaults to stdout)\n" 
+    "\t-i <inputfile>\t\t (defaults to stdin)\n" 
+    "\t-o <outputfile>\t\t (defaults to stdout)\n" 
     "\n"
-    "\t-d <delimiter>\t set the input and output delimiter\n" 
+    "\t-c <columns>\t\t specify columns to output eg. [2][5-8][12-]\n"
+    "\t-d <delimiter>\t\t set the input and output delimiter\n"
+    "\t\t\t\t defaults to ','\n"
     "\t-di <input delimiter>\t set the input delimiter\n" 
     "\t-do <output delimiter>\t set the output delimiter\n"
     "\n"
-    "\t-q <quote character>\n"
-    "\t-b \t\t allow binary data\n"
-    "\t-v \t\t send processing info to stderr\n"
-    "\t-h \t\t help\n"
+    "\t-q <quote character>\t defaults to \"\n"
+    "\t-qi <quote input character>\n"
+    "\t-qo <quote output character>\n"
+    "\t-b \t\t\t allow binary data\n"
+    "\t-v \t\t\t send processing info to stderr\n"
+    "\t-h \t\t\t help\n"
     ""
     ;
   fprintf(fp, help);
@@ -111,7 +116,8 @@ int main(int argc, char** argv) {
   gpOutput=stdout;
   gpDelimIn = ',';
   gpDelimOut = ',';
-  gpQuote = '"';
+  gpQuoteIn = '"';
+  gpQuoteOut = '"';
   gpVerbose = 0;
 
   
@@ -196,9 +202,37 @@ int main(int argc, char** argv) {
       }
       arginc++;
       debug(5, "arg %s %d\n", argv[arginc], strlen(argv[arginc]));
-      gpQuote = argv[arginc][0];
+      gpQuoteIn = argv[arginc][0];
       arginc++;
     }
+    else if (strcmp(argv[arginc], "-qi")==0) {
+      if (argc <= arginc+1) {
+	fprintf(stderr, "error: missing argument for '%s'\n", argv[arginc]);
+	return -1;
+      }
+      arginc++;
+      if (strlen(argv[arginc]) != 1) {
+	fprintf(stderr, "error: only single character delimiters allowed: '%s'\n", argv[arginc]);
+	return -1;
+      }
+      debug(5, "arg %s %d\n", argv[arginc], strlen(argv[arginc]));
+      gpQuoteIn = argv[arginc][0];
+      arginc++;
+    }
+    else if (strcmp(argv[arginc], "-qo")==0) {
+      if (argc <= arginc+1) {
+	fprintf(stderr, "error: missing argument for '%s'\n", argv[arginc]);
+	return -1;
+      }
+      arginc++;
+      if (strlen(argv[arginc]) != 1) {
+	fprintf(stderr, "error: only single character delimiters allowed: '%s'\n", argv[arginc]);
+	return -1;
+      }
+      debug(5, "arg %s %d\n", argv[arginc], strlen(argv[arginc]));
+      gpQuoteOut = argv[arginc][0];
+      arginc++;
+    } 
     else if (strcmp(argv[arginc], "-c")==0) {
       if (argc <= arginc+1) {
 	fprintf(stderr, "error: missing argument for '%s'\n", argv[arginc]);
@@ -228,7 +262,8 @@ int main(int argc, char** argv) {
       return -1;
     }
   }
-  debug(5, "main: input delimiter(%c) output delimiter(%c) quote(%c)\n", gpDelimIn, gpDelimOut, gpQuote);
+  debug(5, "main: input delimiter(%c) output delimiter(%c)\n", gpDelimIn, gpDelimOut);
+  debug(5, "main: input quote(%c) output quote(%c)\n", gpQuoteIn, gpQuoteOut);
   char sbuf[1024]; //FIXME
   debug(5, "main: OutputColumns = %s\n", rangeListToString(sbuf, sizeof(sbuf), gpOutColumns));
   debug(5, "main:start\n");
@@ -320,6 +355,30 @@ int main(int argc, char** argv) {
   return 0;
 }
 
+/*
+ *  Change quote char if needed.
+ */
+void formatOutput(char** str) {
+  debug(100, "formatOutput:start\n");
+  if (gpQuoteIn == gpQuoteOut) {
+    return;
+  }
+  int slen = strlen(*str);
+  if (slen < 2) {
+    return;
+  }
+  debug(100, "formatOutput:slen(%d)\n", slen);
+  debug(100, "formatOutput:str[%d](%c) str[%d](%c)\n", 0, (*str)[0], slen-1, (*str)[2]);
+  if ((*str)[0] == gpQuoteIn && (*str)[slen-1] == gpQuoteIn) {
+    // modify in place for efficiency
+    debug(100, "formatOutput:quoted\n");
+    (*str)[0] = gpQuoteOut;
+    (*str)[slen-1] = gpQuoteOut;
+  }
+  
+  return;
+}
+
 void outputLine(struct csvline* cline) {
   debug(50,"outputLine:start\n");
   if (cline == NULL) return;
@@ -328,7 +387,9 @@ void outputLine(struct csvline* cline) {
     int fieldcnt = csvline_getFieldCnt(cline);
     int i;
     for (i=0; i<fieldcnt; i++) {
-      fprintf(gpOutput, "%s", csvline_getField(cline,i));
+      char* str = csvline_getField(cline,i);
+      formatOutput(&str);
+      fprintf(gpOutput, "%s", str);
       if ( (i+1) != fieldcnt) {
 	fprintf(gpOutput, "%c", gpDelimOut);
       }
@@ -345,6 +406,7 @@ void outputLine(struct csvline* cline) {
       case SINGLE:
 	debug(50,"outputLine:single(%d)\n", list->start);
 	char* str = csvline_getField(cline,list->start - 1);
+	formatOutput(&str);
 	if (strlen(str) == 0) {
 	  //don't print (null)
 	}
@@ -362,6 +424,7 @@ void outputLine(struct csvline* cline) {
 	  char* str = NULL;
 	  for (i=list->start - 1; (i+1) < list->end; i++) {
 	    str = csvline_getField(cline,i);
+	    formatOutput(&str);
 	    if (strlen(str) == 0) {
 	      fprintf(gpOutput, "%c", gpDelimOut);
 	    }
@@ -374,6 +437,7 @@ void outputLine(struct csvline* cline) {
 	    break;
 	  }
 	  str = csvline_getField(cline, last);
+	  formatOutput(&str);
 	  if (strlen(str) == 0) {
 	  }
 	  else {
@@ -391,6 +455,7 @@ void outputLine(struct csvline* cline) {
 	  char* str = "";
 	  for (i=list->start - 1; (i+1)<colCnt; i++) {
 	    str =  csvline_getField(cline,i);
+	    formatOutput(&str);
 	    if (strlen(str) == 0) {
 	    }
 	    else {
@@ -399,6 +464,7 @@ void outputLine(struct csvline* cline) {
 	  }
 	  int last = colCnt - 1;
 	  str =  csvline_getField(cline,last);
+	  formatOutput(&str);
 	  if (strlen(str) == 0) {
 	  }
 	  else {
@@ -434,12 +500,12 @@ int getField(char* buf, int buflen, int* end, bool* inQuoted) {
       exit(-1);
     }
     if (*inQuoted) {
-      if (c==gpQuote) {
+      if (c==gpQuoteIn) {
 	*inQuoted=false;
       }
     }
     else {
-      if (c==gpQuote) {
+      if (c==gpQuoteIn) {
 	*inQuoted=true;
       }
       if (c==gpDelimIn) {
