@@ -5,9 +5,7 @@ command-line csv processing and formatting utility/tool
 * not ready for prime time.  
 
 # TODO
-* rpm spec
 * apt build
-* suse builder
 
 # MAN PAGE
     NAME
@@ -70,5 +68,17 @@ command-line csv processing and formatting utility/tool
     
     SEE ALSO
            awk(1), sed(1), sort(1), tr(1)
-    
+           
+           
 
+# Open Build Service Binaries
+
+SRPM
+
+[cissy-0.2alpha-1.1.src.rpm](https://api.opensuse.org/build/home:slass100/CentOS_6/i586/cissy/cissy-0.2alpha-1.1.src.rpm)
+
+Centos 6 
+
+[cissy-0.2alpha-1.1.i686.rpm](https://api.opensuse.org/build/home:slass100/CentOS_6/i586/cissy/cissy-0.2alpha-1.1.i686.rpm)
+
+[cissy-0.2alpha-1.1.x86_64.rpm](http://download.opensuse.org/repositories/home:/slass100/CentOS_7/x86_64/cissy-0.2alpha-1.1.x86_64.rpm)
