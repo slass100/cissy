@@ -1,11 +1,12 @@
 Summary: Cissy
 Name: cissy
-Version: 0.1
+Version: master
 Release: 1
 License: Apache 2.0
 Group: Applications/System
 BuildRoot: %{_builddir}/%{name}-root 
 URL: http://github.com/slass100/cissy
+Source: master.tar.gz
 Vendor: slass100
 Packager: slass100
 BuildRequires: gcc
@@ -14,20 +15,22 @@ BuildRequires: gcc
 a csv file manipulation utility / tool
 
 %prep
-cd %{_sourcedir}
-git clone https://github.com/slass100/cissy.git
-git checkout tags/%{version}
+echo 'cissy-prep'
+pwd
+%setup
 
 %build
+echo 'cissy-build'
 pwd
-cd %{_sourcedir}/cissy/src
+cd src
 make cissy
 
 %install
+echo 'cissy-install'
 pwd
-cd %{_sourcedir}/cissy/src
-mkdir -p $RPM_BUILD_ROOT/usr/bin
-make install DESTDIR=$RPM_BUILD_ROOT
+cd src
+install -s -m 755 cissy $RPM_BUILD_ROOT/usr/bin/cissy
+install -m 644 ../doc/man/cissy.1 $RPM_BUILD_ROOT/usr/man/man1/cissy.1
 
 %post
 echo "post"

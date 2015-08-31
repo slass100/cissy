@@ -23,7 +23,8 @@ test_range: test_range.c range.o range.h
 all: cissy test
 
 install: cissy
-	cp cissy $(DESTDIR)/usr/bin/
+	install -s -m 755 cissy $(DESTDIR)/usr/bin/cissy
+	install -m 644 ../doc/man/cissy.1 $(DESTDIR)/usr/man/man1/cissy.1
 
 clean:
 	rm -f cissy.exe test_range.exe *.o *.exe.stackdump
