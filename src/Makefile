@@ -24,8 +24,8 @@ all: cissy test
 
 install: cissy
 	install -s -m 755 cissy $(DESTDIR)/usr/bin/cissy
-	install -m 644 ../doc/man/cissy.1 $(DESTDIR)/usr/man/man1/cissy.1
+	install -m 644 doc/man/cissy.1 $(DESTDIR)/usr/share/man/man1/cissy.1
 
 clean:
-	rm -f cissy.exe test_range.exe *.o *.exe.stackdump
+	rm -f *.exe *.o *.exe.stackdump cissy test_csvline test_csvfield test_range
 

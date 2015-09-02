@@ -85,7 +85,7 @@ void usage(FILE* fp) {
     "\t-h \t\t\t help\n"
     ""
     ;
-  fprintf(fp, help);
+  fprintf(fp, help, NULL);
 }
 
 void debug(int level, char* fmt, ...) {
