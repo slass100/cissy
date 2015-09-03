@@ -7,11 +7,11 @@ cissy \- csv delimited text processing utility/tool
 .SH DESCRIPTION
 .ds sd \fIcissy\fP
 .ds Sd \fICissy\fP
-\*(Sd is a stream (file or pipeline) processor used
-to perform basic transformations on delimited text
-files.  It's primary goal is to easily process
-delimited files for reformating and sorting
-(see EXAMPLES below).
+\*(Sd is a stream (file or pipeline) processor 
+used to perform basic transformations on delimited 
+text files.  It's primary goal is to easily 
+process delimited files for reformating and 
+sorting (see EXAMPLES below).
 
 Command-line args are processed first to last, so 
 later args can override initial args.
@@ -31,6 +31,7 @@ reads from stdout, unless output file is specified
 
 .SS
 Processing Options
+
 .HP
 \fB\-d <in/out delimiter>\fR
 .IP
@@ -45,6 +46,24 @@ Field separator
 Field separator
 
 
+.HP
+\fB\-q <in/out quote character>\fR
+.IP
+Quoted text character
+.HP
+\fB\-qi <input quote character>\fR
+.IP
+Input quoted text character
+.HP
+\fB\-qo <output quote character>\fR
+.IP
+Output quoted text character
+
+
+.HP
+\fB\-c <list of columns>\fR
+.IP
+comma separated list.  See EXAMPLES
 
 .SH EXAMPLES
 
@@ -58,7 +77,6 @@ output only the 3rd column
 
 .HP
 \fBcissy -c 3,1,2,4-\fR
-\fBcissy -c 3,1-2,4-\fR
 .IP
 move the 3rd column to the front
 
