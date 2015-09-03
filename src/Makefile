@@ -23,7 +23,9 @@ test_range: test_range.c range.o range.h
 all: cissy test
 
 install: cissy
+	mkdir -p $(DESTDIR)/usr/bin
 	install -s -m 755 cissy $(DESTDIR)/usr/bin/cissy
+	mkdir -p $(DESTDIR)/usr/share/man/man1
 	install -m 644 doc/man/cissy.1 $(DESTDIR)/usr/share/man/man1/cissy.1
 
 clean:
