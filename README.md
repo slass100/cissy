@@ -18,8 +18,6 @@ Some basic examples are shown in the man page.
 
 Here are some of the OBS built binaries
 
-Centos
-------
 
 Centos 5
 [SRPM](http://download.opensuse.org/repositories/home:/slass100/CentOS_5/src/cissy-0.4-16.1.src.rpm)
@@ -49,6 +47,7 @@ Debian 8.0
 [amd64](http://download.opensuse.org/repositories/home:/slass100/Debian_8.0/amd64/cissy_0.4_amd64.deb)
 
 Fedora / Redhat / Ubuntu / Others
+
 [Start Here](https://build.opensuse.org/package/show/home:slass100/cissy)
 Click on the distro, then click on the package.
 
