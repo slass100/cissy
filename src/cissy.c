@@ -29,21 +29,6 @@
 #define MAXCOL 1024
 
 
-/*
--i infile (default: stdin")
--o outfile (default: stdout")
-
--d delimiter char
--q quote char
-
--b allow binary
-
--c output column order (1,4   1,4-8,11-  )
-
--v verbose (messages to stderr)
-*/
-
-
 // Globals
 int32_t gLineCnt;
 
