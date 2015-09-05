@@ -39,6 +39,7 @@ char gpDelimIn;
 char gpDelimOut;
 char gpQuoteIn;
 char gpQuoteOut;
+char* gpEndLine;
 bool gpAllowBinaryFlag = false;
 int gpVerbose;
 struct rangeElement* gpOutColumns = NULL;
@@ -65,6 +66,11 @@ void usage(FILE* fp) {
     "\t-q <quote character>\t defaults to \"\n"
     "\t-qi <quote input character>\n"
     "\t-qo <quote output character>\n"
+    "\n"
+    "\t-ed \t\t\t dos end of line \\r\\n\n"
+    "\t-eu \t\t\t unix end of line \\n\n"
+    "\t-em \t\t\t mac end of line \\r\n"
+    "\n"    
     "\t-b \t\t\t allow binary data\n"
     "\t-v \t\t\t send processing info to stderr\n"
     "\t-h \t\t\t help\n"
@@ -103,6 +109,7 @@ int main(int argc, char** argv) {
   gpDelimOut = ',';
   gpQuoteIn = '"';
   gpQuoteOut = '"';
+  gpEndLine = NULL;
   gpVerbose = 0;
 
   
@@ -217,7 +224,19 @@ int main(int argc, char** argv) {
       debug(5, "arg %s %d\n", argv[arginc], strlen(argv[arginc]));
       gpQuoteOut = argv[arginc][0];
       arginc++;
+    }
+    else if (strcmp(argv[arginc], "-eu")==0) {
+      gpEndLine = "\n";
+      arginc++;
     } 
+    else if (strcmp(argv[arginc], "-ed")==0) {
+      gpEndLine = "\r\n";
+      arginc++;
+    }
+    else if (strcmp(argv[arginc], "-em")==0) {
+      gpEndLine = "\r";
+      arginc++;
+    }     
     else if (strcmp(argv[arginc], "-c")==0) {
       if (argc <= arginc+1) {
 	fprintf(stderr, "error: missing argument for '%s'\n", argv[arginc]);
@@ -468,7 +487,7 @@ void outputLine(struct csvline* cline) {
     }
     while (list != NULL);
   }
-  fprintf(gpOutput, "%s", cline->eolStr);
+  fprintf(gpOutput, "%s", (gpEndLine == NULL ? cline->eolStr : gpEndLine));
   debug(50,"outputLine:end\n");
   return;
 }
