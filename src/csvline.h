@@ -34,5 +34,6 @@ void csvline_reset(struct csvline* cline);
 void csvline_printToFile(struct csvline* cline, FILE* fp);
 struct csvline* csvline_create();
 void csvline_addField(struct csvline* cline, const char* txtfield, int fieldstartidx, int fieldlen);
+void csvline_appendField(struct csvline* cline, const char* txtfield, int fieldstartidx, int fieldlen);
 
 #endif // CSVLINE_H

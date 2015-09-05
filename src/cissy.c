@@ -46,7 +46,7 @@ struct rangeElement* gpOutColumns = NULL;
 
 int rvStateNormal = 0;
 int rvStateMultiline = 0x01;
-int rvStateEOF = 0x02;
+int rvStateEOL = 0x02;
 int rvDelim = 0x04;
 
 void outputLine(struct csvline* cline);
@@ -322,16 +322,23 @@ int main(int argc, char** argv) {
     bool bline = false;
 
     int d=0;
+    bool bInsideQuote = false;
+    bool appendMode = false;
     while (!bline) {
-      bool bInsideQuote = false;
       int parseState = getField(&rawInput[startIdx], bufsize-startIdx, &fieldLen, &bInsideQuote);
-      //debug(50, "s(%d)e(%d)\n", startIdx, fieldLen);
-      csvline_addField(cline, rawInput, startIdx, fieldLen);
+      debug(50, "s(%d)e(%d) (%d)\n", startIdx, fieldLen, bInsideQuote);
+      if (appendMode) {
+	csvline_appendField(cline, rawInput, startIdx, fieldLen);
+      }
+      else {
+	csvline_addField(cline, rawInput, startIdx, fieldLen);
+      }
       startIdx += fieldLen;
       if (parseState == rvDelim) {
 	startIdx++;
       }
-      if (parseState == rvStateEOF) {
+      appendMode = bInsideQuote;
+      if (parseState == rvStateEOL) {
 	if (bInsideQuote) {
 	  c = getline(&rawInput, &rawInputSize, gpInput);
 	  if (c == -1 || c == 0) {
@@ -344,7 +351,6 @@ int main(int argc, char** argv) {
 	  startIdx = 0;
 	  fieldLen = 0;
 	  bufsize = c - startIdx;
-	  fprintf(stderr, "error: to-do: multiline\n");
 	}
 	else {
 	  bline=true;
@@ -495,7 +501,7 @@ void outputLine(struct csvline* cline) {
 // find field
 // return state
 int getField(char* buf, int buflen, int* end, bool* inQuoted) {
-  bool bquoted = false;
+  bool bquoted = *inQuoted;
   for (*end=0; *end<buflen; *end += 1) {
     char c = buf[*end];
     //debug(50, "char(%c)(%d)(%d)(%d)\n", c, (int)c, *end, buflen);
@@ -516,21 +522,21 @@ int getField(char* buf, int buflen, int* end, bool* inQuoted) {
 	return rvDelim;
       }
       if (c=='\r') {
-	return rvStateEOF;
+	return rvStateEOL;
       }
       if (c=='\n') {
-	return rvStateEOF;
+	return rvStateEOL;
       }
       //if (buf[*end]=='\n' && *end == buflen-1) {
-      //	return rvStateEOF;
+      //	return rvStateEOL;
       //}
       //if (buf[*end]=='\r' && *end == buflen-1) {
-      //	return rvStateEOF;
+      //	return rvStateEOL;
       //}
       if (c=='\0' && *end == buflen-1) {
-	return rvStateEOF;
+	return rvStateEOL;
       }      
     }
   }
-  return rvStateEOF;
+  return rvStateEOL;
 }

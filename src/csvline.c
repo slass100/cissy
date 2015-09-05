@@ -95,7 +95,7 @@ void csvline_addField(struct csvline* cline, const char* txtfield, int fieldstar
   cline->currentIdx++;
 }
 
-int csvline_parseField(const char* inputLine, struct csvline* csvline) {
-  
-  return 0;
+// append to the last field in the line
+void csvline_appendField(struct csvline* cline, const char* txtfield, int fieldstartidx, int fieldlen) {
+  csvfield_append(cline->field[cline->currentIdx - 1], txtfield, fieldstartidx, fieldlen);
 }

@@ -42,6 +42,26 @@ void csvfield_set(struct csvfield* ptr, const char* buf, int bufStartIdx, int bu
 	ptr->data[buflen] = '\0';
 }
 
+
+void csvfield_append(struct csvfield* ptr, const char* buf, int bufStartIdx, int buflen) {
+  int origflen = ( ptr->data ? strlen(ptr->data) : 0);
+  if ( (origflen + buflen + 1) > ptr->len ) {
+    char* tmp = ptr->data;
+    ptr->len = ptr->len + buflen + STR_MEM_PAD;
+    ptr->data = malloc(ptr->len);
+    if (ptr->data == NULL) {
+      fprintf(stderr, "csv_setCsvfield: malloc error\n");
+      exit(-1);
+    }
+    if (tmp != NULL) {
+      strncpy(ptr->data, tmp, strlen(tmp)+1);
+      free(tmp);
+    }
+  }
+  strncpy(&ptr->data[origflen], &buf[bufStartIdx], buflen);
+  ptr->data[origflen + buflen] = '\0';
+}
+
 struct csvfield* csvfield_create() {
 	struct csvfield* ptr = malloc(sizeof(struct csvfield));
 	ptr->data = NULL;

@@ -24,6 +24,12 @@ int main(int argc, char** argv) {
     csvfield_set(cfield, txt, 0, strlen(txt));
     csvfield_printToFile(cfield, stderr);
   }
+   {
+    char txt[] = "123";
+    csvfield_set(cfield, txt, 0, strlen(txt));
+    csvfield_append(cfield, txt, 0, strlen(txt));
+    csvfield_printToFile(cfield, stderr);
+  }
   csvfield_reset(cfield);
   csvfield_printToFile(cfield, stderr);
   return 0;
