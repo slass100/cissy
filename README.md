@@ -1,4 +1,5 @@
-# cissy
+cissy
+=====
 command-line csv processing and formatting utility/tool.
 
 See the [man page](https://github.com/slass100/cissy/wiki/man-page) in the 
@@ -7,9 +8,14 @@ Wiki for help.
 
 Some basic examples are shown in the man page.
 
+Things cissy can do (imho) better than awk/sed:
+
+* **1,"2,3",4,5**  ==> **1:"2,3":4:5**     [*cissy -do :* ] 
+* **a,b,c,d,e,f** ==> **d,e,f**      [*cissy -c 4-*]
+* **1,2,3,4,5,6,7** ==> **4,2,1,3,5,6,7**   [*cissy -c 4,2,1,3,5-*]
 
 
-# Binaries/Packages
+Binaries/Packages
 ===================
 
 [Open Build Service](https://build.opensuse.org/) is awesome.
