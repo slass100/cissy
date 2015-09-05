@@ -3,13 +3,13 @@
 
 Summary: Cissy
 Name: cissy
-Version: 0.3
+Version: 0.4
 Release: 1
 License: Apache 2.0
 Group: Applications/System
 BuildRoot: %{_builddir}/%{name}-root 
 URL: http://github.com/slass100/cissy
-Source: cissy-v0.3.tar.gz
+Source: cissy_0.4.orig.tar.gz
 Vendor: slass100
 Packager: slass100
 BuildRequires: gcc

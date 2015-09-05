@@ -1,6 +1,6 @@
 # Maintainer: Steven Lass <slass100@users.noreply.github.com>
 pkgname=cissy
-pkgver=0.3
+pkgver=0.4
 pkgrel=1
 pkgdesc="cissy"
 arch=('i686' 'x86_64')
