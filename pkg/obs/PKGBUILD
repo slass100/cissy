@@ -1,0 +1,24 @@
+# Maintainer: Steven Lass <slass100@users.noreply.github.com>
+pkgname=cissy
+pkgver=0.3
+pkgrel=1
+pkgdesc="cissy"
+arch=('i686' 'x86_64')
+url="https://github.com/slass100/cissy"
+license=('Apache 2.0')
+# depends=('zlib' 'xz')
+makedepends=()
+source=($pkgname-$pkgver.tar.gz)
+md5sums=() #autofill using updpkgsums
+
+build() {
+  cd "$pkgname-$pkgver"
+  make
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+
+  make DESTDIR="$pkgdir/" install
+}
+

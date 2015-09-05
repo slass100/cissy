@@ -1,0 +1,13 @@
+Source: cissy
+Maintainer: Steven Lass <slass100@users.noreply.github.com>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: cissy
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: csv utility
+ manipulate csv files
+
