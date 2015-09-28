@@ -8,17 +8,50 @@ Wiki for help.
 
 Some basic examples are shown in the man page.
 
-Things cissy can do (imho) better than awk/sed:
+Things cissy can do easily:
 
-* **1,"2,3",4,5**  ==> **1:"2,3":4:5**     [*cissy -do :* ] 
-* **a,b,c,d,e,f** ==> **d,e,f**      [*cissy -c 4-*]
-* **1,2,3,4,5,6,7** ==> **4,2,1,3,5,6,7**   [*cissy -c 4,2,1,3,5-*]
+##### Change delimiters without changing quoted text
+```bash
+echo '1,"2,3",4,5' | cissy -do :
+1:"2,3":4:5
+```
+
+##### Move/transpose columns
+```bash
+echo 'a,b,c,d,e,f' | cissy -c 4-
+d,e,f
+```
+
+```bash
+echo 'a,b,c,d,e,f' | cissy -c 1-3,5-
+a,b,c,e,f
+```
+
+
+```bash
+echo 'a,b,c,d,e,f' | cissy -c 4
+d
+```
+
+##### Use filenames or stdin/stdout
+
+```bash
+cat inputfile.txt | cissy -c 4
+
+cissy -i inputfile.txt -c 4
+```
+
+```bash
+cat inputfile.txt | cissy -c 4 > outputfile.txt
+
+cissy -i inputfile.txt -o outputfile.txt -c 4
+```
 
 
 Binaries/Packages
 ===================
 
-[Open Build Service](https://build.opensuse.org/) is awesome.
+Binaries for many Linux distros are available from the [Open Build Service](https://build.opensuse.org/).
 
 [OBS Cissy](https://build.opensuse.org/package/show/home:slass100/cissy)
 
