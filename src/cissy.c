@@ -255,6 +255,10 @@ int main(int argc, char** argv) {
       gpVerbose++;
       arginc++;
     }
+    else if (strcmp(argv[arginc], "-DDD")==0) {
+      gpVerbose += 100;
+      arginc++;
+    }
     else if (strcmp(argv[arginc], "-b")==0) {
       gpAllowBinaryFlag = true;
       arginc++;
