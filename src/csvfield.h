@@ -27,9 +27,9 @@ struct csvfield {
 };
 
 struct csvfield* csvfield_create();
-void csvfield_reset(struct csvfield* ptr);
-void csvfield_set(struct csvfield* ptr, const char* buf, int bufStartIdx, int len);
-void csvfield_append(struct csvfield* ptr, const char* buf, int bufStartIdx, int buflen);
-void csvfield_printToFile(struct csvfield* ptr, FILE* fp);
+void csvfield_reset(struct csvfield* pField);
+void csvfield_set(struct csvfield* pField, const char* buf, int bufStartIdx, int len);
+void csvfield_append(struct csvfield* pField, const char* buf, int bufStartIdx, int buflen);
+void csvfield_printToFile(const struct csvfield* pField, FILE* fp);
 
 #endif

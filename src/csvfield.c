@@ -20,56 +20,107 @@
 
 #include "csvfield.h"
 
+/**
+*  Re-usable data structure for field/line processing.
+*  
+*
+*/
+
+/**
+* Malloc a bit extra so we hopefully do not have to 
+* free/malloc/re-malloc
+*/
 const int STR_MEM_PAD = 10;
 
-void csvfield_printToFile(struct csvfield* ptr, FILE* fp) {
-	fprintf(fp, "[%s:%d]\n", ptr->data, (int) ptr->len);
+/**
+* simple print for debugging
+*
+* @param ptr field to print
+* @param fp output file
+*/
+void csvfield_printToFile(const struct csvfield* pField, FILE* fp) {
+	fprintf(fp, "[%s:%d]\n", pField->data, (int) pField->len);
 }
 
-void csvfield_set(struct csvfield* ptr, const char* buf, int bufStartIdx, int buflen) {
-	if (buflen+1 > ptr->len) {
-		if (ptr->data != NULL) {
-			free(ptr->data);
+/**
+*  Set the Field. Add nul termination.
+*
+* @param pField field to set
+* @param buf input
+* @param offset offset
+* @param buflen length
+*
+*/
+void csvfield_set(struct csvfield* pField, const char* buf, int offset, int buflen) {
+	// create a bigger buffer if needed
+	if (buflen+1 > pField->len) {
+		if (pField->data != NULL) {
+			free(pField->data);
 		}
-		ptr->len = buflen + 1 + STR_MEM_PAD;
-		ptr->data = malloc(ptr->len);
-		if (ptr->data == NULL) {
+		pField->len = buflen + 1 + STR_MEM_PAD;
+		pField->data = malloc(pField->len);
+		if (pField->data == NULL) {
 			fprintf(stderr, "csv_setCsvfield: malloc error\n");
 			exit(-1);
 		}
 	}
-	strncpy(ptr->data, &buf[bufStartIdx], buflen);
-	ptr->data[buflen] = '\0';
+	strncpy(pField->data, &buf[offset], buflen);
+	pField->data[buflen] = '\0';
 }
 
-
-void csvfield_append(struct csvfield* ptr, const char* buf, int bufStartIdx, int buflen) {
-  int origflen = ( ptr->data ? strlen(ptr->data) : 0);
-  if ( (origflen + buflen + 1) > ptr->len ) {
-    char* tmp = ptr->data;
-    ptr->len = ptr->len + buflen + STR_MEM_PAD;
-    ptr->data = malloc(ptr->len);
-    if (ptr->data == NULL) {
+/**
+*  Append to the Field. Add nul termination.
+*
+* @param pField field to set
+* @param buf input
+* @param offset offset
+* @param buflen length
+*/
+void csvfield_append(struct csvfield* pField, const char* buf, int offset, int buflen) {
+  int origflen = ( pField->data ? strlen(pField->data) : 0);
+  if ( (origflen + buflen + 1) > pField->len ) {
+    char* tmp = pField->data;
+    pField->len = pField->len + buflen + STR_MEM_PAD;
+    pField->data = malloc(pField->len);
+    if (pField->data == NULL) {
       fprintf(stderr, "csv_setCsvfield: malloc error\n");
       exit(-1);
     }
     if (tmp != NULL) {
-      strncpy(ptr->data, tmp, strlen(tmp)+1);
+      strncpy(pField->data, tmp, strlen(tmp)+1);
       free(tmp);
     }
   }
-  strncpy(&ptr->data[origflen], &buf[bufStartIdx], buflen);
-  ptr->data[origflen + buflen] = '\0';
+  strncpy(&pField->data[origflen], &buf[offset], buflen);
+  pField->data[origflen + buflen] = '\0';
 }
 
+/**
+* create an empty field
+* 
+* @return new created field
+*/
 struct csvfield* csvfield_create() {
-	struct csvfield* ptr = malloc(sizeof(struct csvfield));
-	ptr->data = NULL;
-	ptr->len = 0;
-	return ptr;
+	struct csvfield* pField = malloc(sizeof(struct csvfield));
+    if (pField == NULL) {
+      fprintf(stderr, "csvfield_create: malloc error\n");
+      exit(-1);
+    }	
+	pField->len = STR_MEM_PAD;
+    pField->data = malloc(pField->len);
+    if (pField->data == NULL) {
+      fprintf(stderr, "csvfield_create: malloc error\n");
+      exit(-1);
+    }
+	return pField;
 }
 
-// try to be efficient
-void csvfield_reset(struct csvfield* ptr) {
-	ptr->data = '\0';
+/**
+*  Reset for re-use.
+*
+* @param pField field to reset
+*
+*/
+void csvfield_reset(struct csvfield* pField) {
+	pField->data = '\0';
 }
