@@ -101,6 +101,181 @@ bool isBinChar(char c) {
   return false;
 }
 
+/*
+ *  Change quote char if needed.
+ */
+void formatOutput(char** str) {
+  debug(100, "formatOutput:start\n");
+  if (gpQuoteIn == gpQuoteOut) {
+    return;
+  }
+  int slen = strlen(*str);
+  if (slen < 2) {
+    return;
+  }
+  debug(100, "formatOutput:slen(%d)\n", slen);
+  debug(100, "formatOutput:str[%d](%c) str[%d](%c)\n", 0, (*str)[0], slen-1, (*str)[2]);
+  if ((*str)[0] == gpQuoteIn && (*str)[slen-1] == gpQuoteIn) {
+    // modify in place for efficiency
+    debug(100, "formatOutput:quoted\n");
+    (*str)[0] = gpQuoteOut;
+    (*str)[slen-1] = gpQuoteOut;
+  }
+  
+  return;
+}
+
+void outputLine(struct csvline* cline) {
+  debug(50,"outputLine:start\n");
+  if (cline == NULL) return;
+  if (gpOutColumns == NULL) { // print all
+    debug(50,"outputLine:printall\n");
+    int fieldcnt = csvline_getFieldCnt(cline);
+    int i;
+    for (i=0; i<fieldcnt; i++) {
+      char* str = csvline_getField(cline,i);
+      formatOutput(&str);
+      fprintf(gpOutput, "%s", str);
+      if ( (i+1) != fieldcnt) {
+	fprintf(gpOutput, "%c", gpDelimOut);
+      }
+    }    
+  }
+  else {
+    debug(50,"outputLine:printranges\n");
+    struct rangeElement* list = gpOutColumns;
+    int colCnt = csvline_getFieldCnt(cline);
+    do {
+      switch (list->rangetype) {
+      case EMPTY:
+	break;
+      case SINGLE:
+	debug(50,"outputLine:single(%d)\n", list->start);
+	char* str = csvline_getField(cline,list->start - 1);
+	formatOutput(&str);
+	if (strlen(str) == 0) {
+	  //don't print (null)
+	}
+	else {
+	  fprintf(gpOutput, "%s",str);
+	}
+	if (list->next != NULL) {
+	  fprintf (gpOutput, "%c", gpDelimOut);
+	}
+	break;
+      case STARTEND:
+	debug(50,"outputLine:startend (%d - %d)\n", list->start, list->end);
+	{
+	  int i=0;
+	  char* str = NULL;
+	  for (i=list->start - 1; (i+1) < list->end; i++) {
+	    str = csvline_getField(cline,i);
+	    formatOutput(&str);
+	    if (strlen(str) == 0) {
+	      fprintf(gpOutput, "%c", gpDelimOut);
+	    }
+	    else {
+	      fprintf(gpOutput, "%s%c", str, gpDelimOut);
+	    }
+	  }
+	  int last = list->end - 1;
+	  if (last >= colCnt) {
+	    break;
+	  }
+	  str = csvline_getField(cline, last);
+	  formatOutput(&str);
+	  if (strlen(str) == 0) {
+	  }
+	  else {
+	    fprintf(gpOutput, "%s",str);
+	  }
+	}
+	if (list->next != NULL) {
+	  fprintf (gpOutput, "%c", gpDelimOut);
+	}
+	break;
+      case GREATEREQUAL:
+	debug(50,"outputLine:greaterequal\n");
+	{
+	  int i;
+	  char* str = "";
+	  for (i=list->start - 1; (i+1)<colCnt; i++) {
+	    str =  csvline_getField(cline,i);
+	    formatOutput(&str);
+	    if (strlen(str) == 0) {
+	    }
+	    else {
+	      fprintf(gpOutput, "%s%c", str, gpDelimOut);
+	    }
+	  }
+	  int last = colCnt - 1;
+	  str =  csvline_getField(cline,last);
+	  formatOutput(&str);
+	  if (strlen(str) == 0) {
+	  }
+	  else {
+	    fprintf(gpOutput, "%s",str);
+	  }
+	}
+	if (list->next != NULL) {
+	  fprintf (gpOutput, "%c", gpDelimOut);
+	}
+	break;
+      default:
+	debug(50,"outputLine:default (error)\n");
+	break;
+      }
+      list = list->next;
+    }
+    while (list != NULL);
+  }
+  fprintf(gpOutput, "%s", (gpEndLine == NULL ? cline->eolStr : gpEndLine));
+  debug(50,"outputLine:end\n");
+  return;
+}
+
+// find field
+// return state
+int getField(char* buf, int buflen, int* end, bool* inQuoted) {
+  bool bquoted = *inQuoted;
+  for (*end=0; *end<buflen; *end += 1) {
+    char c = buf[*end];
+    //debug(50, "char(%c)(%d)(%d)(%d)\n", c, (int)c, *end, buflen);
+    if (!gpAllowBinaryFlag && isBinChar(c)) {
+      fprintf(stderr, "error: line(%d): binary character (%d) found.  Use flag to ignore/pass\n", gLineCnt, (int)c);
+      exit(-1);
+    }
+    if (*inQuoted) {
+      if (c==gpQuoteIn) {
+	*inQuoted=false;
+      }
+    }
+    else {
+      if (c==gpQuoteIn) {
+	*inQuoted=true;
+      }
+      if (c==gpDelimIn) {
+	return rvDelim;
+      }
+      if (c=='\r') {
+	return rvStateEOL;
+      }
+      if (c=='\n') {
+	return rvStateEOL;
+      }
+      //if (buf[*end]=='\n' && *end == buflen-1) {
+      //	return rvStateEOL;
+      //}
+      //if (buf[*end]=='\r' && *end == buflen-1) {
+      //	return rvStateEOL;
+      //}
+      if (c=='\0' && *end == buflen-1) {
+	return rvStateEOL;
+      }      
+    }
+  }
+  return rvStateEOL;
+}
 int main(int argc, char** argv) {
   //init
   gpInput=stdin;
@@ -369,178 +544,3 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-/*
- *  Change quote char if needed.
- */
-void formatOutput(char** str) {
-  debug(100, "formatOutput:start\n");
-  if (gpQuoteIn == gpQuoteOut) {
-    return;
-  }
-  int slen = strlen(*str);
-  if (slen < 2) {
-    return;
-  }
-  debug(100, "formatOutput:slen(%d)\n", slen);
-  debug(100, "formatOutput:str[%d](%c) str[%d](%c)\n", 0, (*str)[0], slen-1, (*str)[2]);
-  if ((*str)[0] == gpQuoteIn && (*str)[slen-1] == gpQuoteIn) {
-    // modify in place for efficiency
-    debug(100, "formatOutput:quoted\n");
-    (*str)[0] = gpQuoteOut;
-    (*str)[slen-1] = gpQuoteOut;
-  }
-  
-  return;
-}
-
-void outputLine(struct csvline* cline) {
-  debug(50,"outputLine:start\n");
-  if (cline == NULL) return;
-  if (gpOutColumns == NULL) { // print all
-    debug(50,"outputLine:printall\n");
-    int fieldcnt = csvline_getFieldCnt(cline);
-    int i;
-    for (i=0; i<fieldcnt; i++) {
-      char* str = csvline_getField(cline,i);
-      formatOutput(&str);
-      fprintf(gpOutput, "%s", str);
-      if ( (i+1) != fieldcnt) {
-	fprintf(gpOutput, "%c", gpDelimOut);
-      }
-    }    
-  }
-  else {
-    debug(50,"outputLine:printranges\n");
-    struct rangeElement* list = gpOutColumns;
-    int colCnt = csvline_getFieldCnt(cline);
-    do {
-      switch (list->rangetype) {
-      case EMPTY:
-	break;
-      case SINGLE:
-	debug(50,"outputLine:single(%d)\n", list->start);
-	char* str = csvline_getField(cline,list->start - 1);
-	formatOutput(&str);
-	if (strlen(str) == 0) {
-	  //don't print (null)
-	}
-	else {
-	  fprintf(gpOutput, "%s",str);
-	}
-	if (list->next != NULL) {
-	  fprintf (gpOutput, "%c", gpDelimOut);
-	}
-	break;
-      case STARTEND:
-	debug(50,"outputLine:startend (%d - %d)\n", list->start, list->end);
-	{
-	  int i=0;
-	  char* str = NULL;
-	  for (i=list->start - 1; (i+1) < list->end; i++) {
-	    str = csvline_getField(cline,i);
-	    formatOutput(&str);
-	    if (strlen(str) == 0) {
-	      fprintf(gpOutput, "%c", gpDelimOut);
-	    }
-	    else {
-	      fprintf(gpOutput, "%s%c", str, gpDelimOut);
-	    }
-	  }
-	  int last = list->end - 1;
-	  if (last >= colCnt) {
-	    break;
-	  }
-	  str = csvline_getField(cline, last);
-	  formatOutput(&str);
-	  if (strlen(str) == 0) {
-	  }
-	  else {
-	    fprintf(gpOutput, "%s",str);
-	  }
-	}
-	if (list->next != NULL) {
-	  fprintf (gpOutput, "%c", gpDelimOut);
-	}
-	break;
-      case GREATEREQUAL:
-	debug(50,"outputLine:greaterequal\n");
-	{
-	  int i;
-	  char* str = "";
-	  for (i=list->start - 1; (i+1)<colCnt; i++) {
-	    str =  csvline_getField(cline,i);
-	    formatOutput(&str);
-	    if (strlen(str) == 0) {
-	    }
-	    else {
-	      fprintf(gpOutput, "%s%c", str, gpDelimOut);
-	    }
-	  }
-	  int last = colCnt - 1;
-	  str =  csvline_getField(cline,last);
-	  formatOutput(&str);
-	  if (strlen(str) == 0) {
-	  }
-	  else {
-	    fprintf(gpOutput, "%s",str);
-	  }
-	}
-	if (list->next != NULL) {
-	  fprintf (gpOutput, "%c", gpDelimOut);
-	}
-	break;
-      default:
-	debug(50,"outputLine:default (error)\n");
-	break;
-      }
-      list = list->next;
-    }
-    while (list != NULL);
-  }
-  fprintf(gpOutput, "%s", (gpEndLine == NULL ? cline->eolStr : gpEndLine));
-  debug(50,"outputLine:end\n");
-  return;
-}
-
-// find field
-// return state
-int getField(char* buf, int buflen, int* end, bool* inQuoted) {
-  bool bquoted = *inQuoted;
-  for (*end=0; *end<buflen; *end += 1) {
-    char c = buf[*end];
-    //debug(50, "char(%c)(%d)(%d)(%d)\n", c, (int)c, *end, buflen);
-    if (!gpAllowBinaryFlag && isBinChar(c)) {
-      fprintf(stderr, "error: line(%d): binary character (%d) found.  Use flag to ignore/pass\n", gLineCnt, (int)c);
-      exit(-1);
-    }
-    if (*inQuoted) {
-      if (c==gpQuoteIn) {
-	*inQuoted=false;
-      }
-    }
-    else {
-      if (c==gpQuoteIn) {
-	*inQuoted=true;
-      }
-      if (c==gpDelimIn) {
-	return rvDelim;
-      }
-      if (c=='\r') {
-	return rvStateEOL;
-      }
-      if (c=='\n') {
-	return rvStateEOL;
-      }
-      //if (buf[*end]=='\n' && *end == buflen-1) {
-      //	return rvStateEOL;
-      //}
-      //if (buf[*end]=='\r' && *end == buflen-1) {
-      //	return rvStateEOL;
-      //}
-      if (c=='\0' && *end == buflen-1) {
-	return rvStateEOL;
-      }      
-    }
-  }
-  return rvStateEOL;
-}
