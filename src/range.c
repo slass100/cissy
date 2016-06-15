@@ -21,7 +21,15 @@
 #include <string.h>
 #include "range.h"
 
+/**
+* Used for column lists
+*/
 
+/**
+* free memory
+*
+* @param list range
+*/
 void rangeFree(struct rangeElement* list) {
   if (list == NULL) {
     return;
@@ -36,10 +44,13 @@ void rangeFree(struct rangeElement* list) {
   list=NULL;
 }
 
+/**
+* Create a new range
+*/
 struct rangeElement* rangeCreate() {
   struct rangeElement* ptr = malloc(sizeof(struct rangeElement));
   if (ptr == NULL) {
-    fprintf(stderr, "error: malloc\n");
+    fprintf(stderr, "rangeCreate: malloc error\n");
     exit(-1);
   }
   ptr->start = -1;
@@ -49,6 +60,16 @@ struct rangeElement* rangeCreate() {
 }
 
 // pass NULL list to create new list
+/**
+* add a n-m range to the list
+*
+* Add start-end range.  Create a new list if necessary
+*
+* @param start beginning 
+* @param end ending
+* @param startOfList list
+* @return list
+*/
 struct rangeElement* rangeAddStartEnd(uint32_t start, uint32_t end, struct rangeElement* startOfList) {
   assert(start > 0);
   assert(end >= start);
@@ -82,7 +103,15 @@ struct rangeElement* rangeAddStartEnd(uint32_t start, uint32_t end, struct range
   return startOfList;
 }
 
-// pass NULL list to create new list
+/**
+* Add a n- range (to end of line) to list
+*
+* Add a greater than range, create new list if necessary
+*
+* @param num beginning 
+* @param startOfList list
+* @return list
+*/
 struct rangeElement* rangeAddGreaterEqual(uint32_t num, struct rangeElement* startOfList) {
   assert(num >= 0);
   if (startOfList == NULL) {
@@ -103,7 +132,15 @@ struct rangeElement* rangeAddGreaterEqual(uint32_t num, struct rangeElement* sta
   return startOfList;
 }
 
-// pass NULL list to create new list
+/**
+* Add a single element to list
+*
+* Add a number, create new list if necessary
+*
+* @param num number to add 
+* @param startOfList list
+* @return list
+*/
 struct rangeElement* rangeAddSingle(uint32_t num, struct rangeElement* startOfList) {
   assert(num > 0);
   if (startOfList == NULL) {
@@ -124,6 +161,16 @@ struct rangeElement* rangeAddSingle(uint32_t num, struct rangeElement* startOfLi
   return startOfList;
 }
 
+/**
+* format as string
+*
+* pass in the buffer
+*
+* @param buf buffer for output
+* @param bufsize size of buffer
+* @param element range element to format
+* @return buf
+*/
 char* rangeElementToString(char* buf, uint32_t bufsize, struct rangeElement* element) {
   assert(bufsize >= 0);
   assert(element != NULL);
@@ -145,6 +192,16 @@ char* rangeElementToString(char* buf, uint32_t bufsize, struct rangeElement* ele
   }
 }
 
+/**
+* format range list as string
+*
+* pass in the buffer
+*
+* @param buf buffer for output
+* @param bufsize size of buffer
+* @param element range element to format
+* @return buf
+*/
 char* rangeListToString(char* buf, uint32_t bufsize, struct rangeElement* startOfList) {
   int tmpbufsize = 256;
   char tmpbuf[tmpbufsize];
@@ -165,6 +222,13 @@ char* rangeListToString(char* buf, uint32_t bufsize, struct rangeElement* startO
   return buf;
 }
 
+/**
+* test if num in range
+*
+* @param num number to check
+* @param startOfList range
+* @return true if num in range
+*/
 bool rangeContainsNum(uint32_t num, struct rangeElement* startOfList) {
   assert(startOfList != NULL);
   assert(num >= 0);
@@ -186,8 +250,12 @@ bool rangeContainsNum(uint32_t num, struct rangeElement* startOfList) {
   }
 }
 
-
-
+/**
+* parse a string to a range list
+*
+* @param text input string
+* @return rangelist
+*/
 struct rangeElement* parseIntRanges(const char* text) {
   int state = 0;
   int flag_dash = 0x01;
