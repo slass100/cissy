@@ -2,6 +2,10 @@ cissy
 =====
 command-line csv processing and formatting utility/tool.
 
+AWK, sed, cut and other popular/common utilities can handle a 
+majority of tasks, but cissy is specifically written to for CSV
+files where the quoted text contains the field separator.
+
 See the [man page](https://github.com/slass100/cissy/wiki/man-page) in the 
 Wiki for help.
 
